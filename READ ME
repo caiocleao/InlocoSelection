@@ -1,0 +1,31 @@
+READ ME
+
+Build and run instructions:
+
+The program was developed and tested using Eclise Neon and can by executed by simply running the Gui.java class. All of necessary imports are already built-in with Eclipse and only WindowBuilder was added to develop the graphical interface. Custom created data-structures are also on the default packeage and need not to be imported to the project.
+
+Design Decisions: 
+
+Java was the chosen programing language for two main reasons: Familiarity and it was the language used previously used to describe a System on the first step of the selection process. 
+A Graphical interface was developed aiming for ease of use. 
+We used File System because things are already partly automated, not having the user type all sites that need to be monitored everytime there is a change on the list.
+Having a "Update List" Button was both a Design Decision and a limitation. In the short time i was not able to make the list update itself everytime it was changed and decided to use a button as it might prove usefull in case we want to analise the data without it constantly changing. 
+By limiting the amount of updates done on the JTable used, the process also becomes faster.
+
+Limitations: 
+
+The application is not robust. Input checks are not properly made and if inserted the application will not work and it will not give feedback to the user as to what the bad input was. Something that can be done but it was not so due to time restraints.
+Requests are made sequencially. We only have one timer for all requests. Meaning if the list of url's grows, it can take seconds before we start the "wait" phase again, making the interval between individual url requests longer than 5 seconds.
+The list is only updated at the press of a button.
+
+Improvments: 
+
+Most were mentioned on limitations and some Design Decisions, but i will list here as well.
+
+Robust input check and information feedback for the user as to what exactly the wrong input was.
+Add option to make the list update as new data comes in.
+Create a multi-thread version of the application with each thread having it's own counter, increasing the precision on the timing of the requests.
+Save colected data on a File for further use by either Humans or Software.
+Have a executable .jar file.
+
+By: Caio César Leão Carneiro de Araújo
