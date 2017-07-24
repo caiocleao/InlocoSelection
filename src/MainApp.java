@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class MainApp extends Thread {
 
-	boolean running = true;
+	boolean running = false;
 	List fileData;
 	
 	public List readFile ( String filePath ) throws IOException {
@@ -44,44 +44,52 @@ public class MainApp extends Thread {
 		return fileData;
 	}
 	
-	public void run () {
+	public void run() {
 		
 		int getResult;
-			
-		while ( running ) {
 		
-			Node aux = fileData.header;
-			while ( aux != null ) {
-				getResult = getRequest( aux.url, aux.sfr );
-				aux.totalRequests++;
+		while ( true ) {
+			System.out.println("lalalalala");
+			while ( running ) {
+				System.out.println("running");
+				Node aux = fileData.header;
+				while ( aux != null ) {
+					getResult = getRequest( aux.url, aux.sfr );
+					aux.totalRequests++;
+					
+					if ( getResult == 2 ) {
+						
+						// SR
+						aux.sfrResult++;
+						aux.srResult++;
+						
+					} else if ( getResult == 1 ) {
+						
+						aux.srResult++;
+						
+					} 
+					
+					aux = aux.right;
+				}
 				
-				if ( getResult == 2 ) {
-					
-					// SR
-					aux.sfrResult++;
-					aux.srResult++;
-					
-				} else if ( getResult == 1 ) {
-					
-					aux.srResult++;
-					
-				} 
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
-				aux = aux.right;
-			}
-			
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 			
 		}
+		
+		
+		// We hit the stop button
 			
-			System.out.println("Finished");
-	
+			
 	}
+	
+	
 	
 	// Returns 1 on SR, 2 on SFR and 0 on FR ( Failed Request ).
 	public int getRequest ( String urlString, double sfr ) {
@@ -95,9 +103,10 @@ public class MainApp extends Thread {
 			url = new URL(urlString);
 			connection = ( HttpURLConnection ) url.openConnection();
 			connection.setRequestMethod("GET");
+			System.out.println("before Connecting");
 			connection.connect();
 			int code = connection.getResponseCode();
-			
+			System.out.println(code);
 			long endTime = System.nanoTime();
 			long duration = ( endTime - startTime ) / 1000000; // Running time in ms
 			if ( duration <= sfr ) {

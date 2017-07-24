@@ -28,10 +28,11 @@ public class Gui extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField pathField;
-	private JTable table;
-	MainApp appInstance;
-	List dataFromFile;
-
+	static private JTable table;
+	static MainApp appInstance;
+	static List dataFromFile;
+	static Gui frame;
+	static TableUpdater tu;
 	/**
 	 * Launch the application.
 	 */
@@ -39,8 +40,10 @@ public class Gui extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Gui frame = new Gui();
+					frame = new Gui();
 					frame.setVisible(true);
+					tu = new TableUpdater();
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -76,12 +79,15 @@ public class Gui extends JFrame {
 			*/
 			public void actionPerformed(ActionEvent arg0) {
 				
-				if ( appInstance == null || ( appInstance != null && !appInstance.running ) ) {
+				System.out.println("Button Clicked");
+				
+				
+				if ( appInstance == null ) {
 				
 					appInstance = new MainApp ();
-					
+					appInstance.running = true;
 					try {
-			
+						
 						dataFromFile = appInstance.readFile(pathField.getText());
 						if ( dataFromFile.size > 0 ) {
 							// There is something on the file:
@@ -104,15 +110,33 @@ public class Gui extends JFrame {
 							}
 								
 							appInstance.start();
-							
+							tu.start();
 						}
 					
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					
+				} else {
+				
+					// We already have a instance of the application running for some reason. How to proceed?
+					if ( appInstance.running ) {
+						
+						// If we are here, we clicked start and the aplication is already running. Do nothing. 
+						/*
+						 * TODO
+						 * make code for reseting current monitoring process 
+						 * */
+						
+					} else if ( !appInstance.running ) {
+						
+						appInstance.running = true;
+
+					}
 				
 				}
+				System.out.println(appInstance.running);
 			}
 		});
 		
@@ -171,8 +195,6 @@ public class Gui extends JFrame {
 					dtm.setValueAt(roundedSr + "%" , currentLine, 2);
 					dtm.setValueAt(roundedSfr + "%", currentLine, 3);
 					
-					System.out.println(roundedSfr + " aux -> " + aux.getSfr());
-					
 					if ( roundedSfr >= aux.getSr() ) {
 						dtm.setValueAt("SRO Met ( Fast )", currentLine, 4);
 					} else if ( roundedSr >= aux.getSr() ) {
@@ -189,6 +211,7 @@ public class Gui extends JFrame {
 				
 			}
 		});
+		
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -297,4 +320,54 @@ public class Gui extends JFrame {
 		infoPanel.setLayout(gl_infoPanel);
 		contentPane.setLayout(gl_contentPane);
 	}
+	
+	static class TableUpdater extends Thread {
+		
+		public void run() {
+			while ( true ) {
+			
+				while (appInstance.running) {
+					
+					updateTable();
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		public void updateTable () {
+			DefaultTableModel dtm = (DefaultTableModel) table.getModel();
+			Node aux = dataFromFile.header;
+			int currentLine = 0;
+			while ( aux != null ) {
+				
+				dtm.setValueAt(aux.url, currentLine, 0);
+				dtm.setValueAt(aux.totalRequests, currentLine, 1);
+				
+				double roundedSr = Math.round(  (aux.srResult/aux.totalRequests) * 100 );
+				double roundedSfr = Math.round( (aux.sfrResult/aux.totalRequests) * 100 );
+				dtm.setValueAt(roundedSr + "%" , currentLine, 2);
+				dtm.setValueAt(roundedSfr + "%", currentLine, 3);
+
+				if ( roundedSfr >= aux.getSr() ) {
+					dtm.setValueAt("SRO Met ( Fast )", currentLine, 4);
+				} else if ( roundedSr >= aux.getSr() ) {
+					dtm.setValueAt("SRO Met", currentLine, 4);
+				} else  {
+					dtm.setValueAt("SRO Not Met", currentLine, 4);
+				}
+				
+				
+				currentLine++;
+				aux = aux.right;
+				
+			}
+		}
+		
+	}
+	
+
+	
 }
